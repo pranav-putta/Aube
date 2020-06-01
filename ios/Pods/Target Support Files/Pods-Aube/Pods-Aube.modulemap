@@ -1,0 +1,6 @@
+module Pods_Aube {
+  umbrella header "Pods-Aube-umbrella.h"
+
+  export *
+  module * { export * }
+}

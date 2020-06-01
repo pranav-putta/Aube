@@ -1,0 +1,6 @@
+module Pods_Aube_AubeTests {
+  umbrella header "Pods-Aube-AubeTests-umbrella.h"
+
+  export *
+  module * { export * }
+}
