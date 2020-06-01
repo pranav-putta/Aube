@@ -1,0 +1,4 @@
+#Mon Jun 01 15:01:27 CDT 2020
+base.0=/Users/pranavputta/GitHub/Aube-Sales/android/app/build/intermediates/dex/debug/mergeDexDebug/out/classes.dex
+renamed.0=classes.dex
+path.0=classes.dex

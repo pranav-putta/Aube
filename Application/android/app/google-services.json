@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "662872165907",
+    "firebase_url": "https://aube-61c1c.firebaseio.com",
+    "project_id": "aube-61c1c",
+    "storage_bucket": "aube-61c1c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:662872165907:android:2f2d389930bd1eb62ab9e6",
+        "android_client_info": {
+          "package_name": "com.aube"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "662872165907-loc3spuft6h6r9f1mmitkrcq56dnded2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aube",
+            "certificate_hash": "a20462f741f1acb41778cbfd5737ed3e0a77d900"
+          }
+        },
+        {
+          "client_id": "662872165907-qktb980rp3p1h4c38s4um4ocuvg0uamc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBt93dIM7SVYf2zWPCt_jHSkbVsd8XM4UE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "662872165907-qktb980rp3p1h4c38s4um4ocuvg0uamc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
