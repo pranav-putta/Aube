@@ -1,4 +1,4 @@
-#Sun May 31 20:22:10 CDT 2020
-base.0=/Users/pranavputta/Documents/Projects/Aube/android/app/build/intermediates/dex/debug/mergeDexDebug/out/classes.dex
-renamed.0=classes.dex
+#Mon Jun 01 03:03:43 CDT 2020
+base.0=C\:\\Users\\prana\\Documents\\GitHub\\Aube-Sales\\android\\app\\build\\intermediates\\dex\\debug\\mergeDexDebug\\out\\classes.dex
 path.0=classes.dex
+renamed.0=classes.dex
