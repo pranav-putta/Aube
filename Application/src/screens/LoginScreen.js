@@ -20,7 +20,7 @@ import {
 import colors from "../util/colors";
 import { Icon } from "native-base";
 import * as Animatable from "react-native-animatable";
-import firebase from "@react-native-firebase/app";
+import functions from "@react-native-firebase/functions";
 import auth from "@react-native-firebase/auth";
 
 /**
@@ -118,29 +118,46 @@ class LoginScreen extends React.Component {
    */
   handleSignInClick = () => {
     let phone = "+1" + this.state.phoneNumber;
+    // TODO: validate format of phone number is correct
+
     // verify phone number
-    // FIXME: make sure that the phone number is valid before adding
-    auth()
-      .signInWithPhoneNumber(phone)
-      .then((result) => {
-        // FIXME: make a full page for phone number code verification?
-        Alert.prompt(
-          "Confirmation code",
-          "Enter the code sent to your phone",
-          [
-            { text: "Cancel", style: "cancel" },
-            {
-              text: "OK",
-              onPress: (password) =>
-                result.confirm(password).then((result) => {
-                  console.log(result);
-                }).catch((error) => {
-                  console.log("incorrect value sorry :(.")
-                }),
-            },
-          ],
-          "secure-text"
-        );
+    functions().useFunctionsEmulator("http://localhost:5001");
+    functions()
+      .httpsCallable("verifySalesUser")({ phoneNumber: phone })
+      .then((response) => {
+        if (response.data.result) {
+          auth()
+            .signInWithPhoneNumber(phone)
+            .then((result) => {
+              // TODO: make a full page for phone number code verification?
+              Alert.prompt(
+                "Confirmation code",
+                "Enter the code sent to your phone",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "OK",
+                    onPress: (password) =>
+                      result
+                        .confirm(password)
+                        .then((result) => {
+                          console.log(result);
+                        })
+                        .catch((error) => {
+                          console.log("incorrect value sorry :(.");
+                        }),
+                  },
+                ],
+                "secure-text"
+              );
+            });
+        } else {
+          alert("Your number isn't registered! Contact Aube.")
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("Something went wrong.")
       });
   };
 
