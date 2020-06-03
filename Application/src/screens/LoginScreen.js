@@ -18,7 +18,7 @@ import {
   Alert,
 } from "react-native";
 import colors from "../util/colors";
-import { Icon } from "native-base";
+import { Icon } from "react-native-elements";
 import * as Animatable from "react-native-animatable";
 import functions from "@react-native-firebase/functions";
 import auth from "@react-native-firebase/auth";
@@ -51,6 +51,9 @@ class LoginScreen extends React.Component {
     });
   }
 
+  /**
+   * Install listeners
+   */
   componentDidMount() {
     this.keyboardDidShowListener = Keyboard.addListener(
       "keyboardWillShow",
@@ -62,6 +65,9 @@ class LoginScreen extends React.Component {
     );
   }
 
+  /**
+   * Clean up listeners
+   */
   componentWillUnmount() {
     this.keyboardDidShowListener.remove();
     this.keyboardDidHideListener.remove();
@@ -121,7 +127,6 @@ class LoginScreen extends React.Component {
     // TODO: validate format of phone number is correct
 
     // verify phone number
-    functions().useFunctionsEmulator("http://localhost:5001");
     functions()
       .httpsCallable("verifySalesUser")({ phoneNumber: phone })
       .then((response) => {
@@ -152,12 +157,12 @@ class LoginScreen extends React.Component {
               );
             });
         } else {
-          alert("Your number isn't registered! Contact Aube.")
+          alert("Your number isn't registered! Contact Aube.");
         }
       })
       .catch((err) => {
         console.log(err);
-        alert("Something went wrong.")
+        alert("Something went wrong.");
       });
   };
 
@@ -191,7 +196,7 @@ class LoginScreen extends React.Component {
     });
     const titleTextBottom = this.loginHeight.interpolate({
       inputRange: [START_HEIGHT, SCREEN_HEIGHT],
-      outputRange: [0, 55],
+      outputRange: [0, 40],
     });
     const titleTextOpacity = this.loginHeight.interpolate({
       inputRange: [START_HEIGHT, SCREEN_HEIGHT],
@@ -207,13 +212,13 @@ class LoginScreen extends React.Component {
             height: 60,
             width: 60,
             marginTop: "12%",
-            left: 25,
+            left: 10,
             zIndex: 100,
             opacity: headerBackArrowOpacity,
           }}
         >
           <TouchableOpacity onPress={() => this.zoomOutLoginAnimation()}>
-            <Icon name="md-arrow-back" style={{ color: "black" }} />
+            <Icon type="feather" name="arrow-left" color="black" size={28} />
           </TouchableOpacity>
         </Animated.View>
 
@@ -242,7 +247,7 @@ class LoginScreen extends React.Component {
             }}
             onPress={this.handleSignInClick}
           >
-            <Icon name="md-arrow-forward" style={{ color: "white" }} />
+            <Icon type="feather" name="arrow-right" color="white" />
           </TouchableOpacity>
         </Animated.View>
 

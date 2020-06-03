@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "/Users/pranavputta/GitHub/Aube-Sales/android/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-te/values-te.xml",
+            "outputFile": "/Users/pranavputta/GitHub/Aube-Sales/Application/android/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values-te/values-te.xml",
             "map": [
                 {
                     "source": "/Users/pranavputta/.gradle/caches/transforms-2/files-2.1/82655d2cc03513f361fadfb0cda6f108/jetified-play-services-basement-17.0.0/res/values-te/values.xml",
