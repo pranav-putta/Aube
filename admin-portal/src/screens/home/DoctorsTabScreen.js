@@ -6,12 +6,14 @@ import {
   Dimensions,
   SectionList,
   RefreshControl,
+  TouchableOpacity,
+  TouchableHighlight,
 } from "react-native";
 import MenuHeaderComponent from "../../navigation/MenuHeaderComponent";
 import DropDownPicker from "react-native-dropdown-picker";
 import colors from "../../util/colors";
-import { Icon } from "react-native-elements";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { Modal } from "modal-react-native-web";
+import { screenKeys } from "../../navigation/AppStackNavigator";
 
 const filterItems = [
   { label: "Name", value: "label" },
@@ -39,11 +41,14 @@ class DoctorsTabScreen extends React.Component {
         { id: "10", name: "Bulgaria" },
       ],
     ],
+    modalVisible: false,
   };
 
-  GetSectionListItem = (item) => {
-    this.props.navigation.navigate("CheckInForm", { data: item });
-  };
+  toggleModal(visible) {
+    this.setState({ modalVisible: visible });
+  }
+
+  GetSectionListItem = (item) => {};
   FlatListItemSeparator = () => {
     return (
       //Item Separator
@@ -78,6 +83,7 @@ class DoctorsTabScreen extends React.Component {
       </TouchableOpacity>
     );
   };
+
   render() {
     return (
       <View style={styles.container}>
@@ -91,11 +97,24 @@ class DoctorsTabScreen extends React.Component {
             placeholderStyle={{ color: colors.blue }}
             dropDownStyle={{ backgroundColor: "white" }}
           />
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Add a doctor</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              this.props.navigation.navigate(screenKeys.newDoctor);
+            }}
+          >
+            <Text style={styles.buttonText}>New Doctor</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Import</Text>
+            <Text style={styles.buttonText}>Import Data</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              this.props.navigation.navigate(screenKeys.editFields);
+            }}
+          >
+            <Text style={styles.buttonText}>Edit Fields</Text>
           </TouchableOpacity>
         </View>
         <SectionList
@@ -129,6 +148,19 @@ class DoctorsTabScreen extends React.Component {
     );
   }
 }
+
+const modalStyles = StyleSheet.create({
+  modal: {
+    flex: 1,
+    alignItems: "center",
+    backgroundColor: "#f7021a",
+    padding: 100,
+  },
+  text: {
+    color: "#3f2949",
+    marginTop: 10,
+  },
+});
 
 const styles = StyleSheet.create({
   container: {

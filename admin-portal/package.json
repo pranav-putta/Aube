@@ -16,6 +16,8 @@
     "expo-splash-screen": "^0.2.3",
     "expo-updates": "~0.2.0",
     "firebase": "^7.15.0",
+    "modal-enhanced-react-native-web": "^0.2.0",
+    "modal-react-native-web": "^0.2.0",
     "react": "~16.9.0",
     "react-dom": "~16.9.0",
     "react-native": "~0.61.5",

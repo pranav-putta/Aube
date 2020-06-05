@@ -17,9 +17,38 @@ exports.verifySalesUser = functions.https.onCall((data, context) => {
     .where("phoneNumber", "==", phoneNumber)
     .get()
     .then((response) => {
-      return {result: !response.empty, error: null};
-    }).catch((err) => {
-      return {result: false, error: err};
+      return { result: !response.empty, error: null };
+    })
+    .catch((err) => {
+      return { result: false, error: err };
     });
+});
 
+exports.newDoctor = functions.https.onCall((data, context) => {
+  data.status = [{ action: "created", time: Date.now().toString() }];
+  return admin
+    .firestore()
+    .collection("doctors")
+    .add(data)
+    .then((ref) => {
+      return { success: true, id: ref.id };
+    })
+    .catch((err) => {
+      return { success: false, id: "", error: err };
+    });
+});
+
+exports.updateFields = functions.https.onCall((data, context) => {
+  let col = data.collection;
+  return admin
+    .firestore()
+    .collection(col)
+    .doc("fields")
+    .set(data.data)
+    .then(() => {
+      return { success: true };
+    })
+    .catch((err) => {
+      return { success: false, error: err };
+    });
 });
