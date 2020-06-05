@@ -1,0 +1,17 @@
+{
+  "name": "admin-portal",
+  "displayName": "admin-portal",
+  "expo": {
+    "name": "admin-portal",
+    "slug": "expo-template-bare",
+    "version": "1.0.0",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
