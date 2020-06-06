@@ -14,7 +14,7 @@ import firebase from "firebase";
 
 const Drawer = createDrawerNavigator();
 
-class NewDoctorScreen extends React.Component {
+class NewItemScreen extends React.Component {
   state = {
     verified: true,
     enabled: true,
@@ -24,19 +24,18 @@ class NewDoctorScreen extends React.Component {
   };
 
   componentDidMount() {
-    this.setState({ showProgress: true });
+    this.setState({ enabled: false });
     firebase
       .functions()
       .httpsCallable("getFields")({
-        collection: "doctors",
+        collection: this.props.route.params.collection,
       })
       .then((response) => {
         this.setState({ formItems: response.data.data.fields });
-        this.setState({ showProgress: false });
-        alert(JSON.stringify(response.data));
+        this.setState({ enabled: true });
       })
       .catch((response) => {
-        this.setState({ showProgress: false });
+        this.setState({ enabled: true });
         alert(response.data.message);
       });
   }
@@ -49,9 +48,16 @@ class NewDoctorScreen extends React.Component {
 
   submitData = () => {
     this.setState({ enabled: false });
+    let col = this.props.route.params.collection;
+    let f = "newDoctor";
+    if (col == "doctors") {
+      f = "newDoctor";
+    } else if (col == "sales-reps") {
+      f = "newSalesRep";
+    }
     firebase
       .functions()
-      .httpsCallable("newDoctor")(this.state.data)
+      .httpsCallable(f)(this.state.data)
       .then((response) => {
         this.setState({ enabled: true });
         alert(response.data.success);
@@ -66,6 +72,9 @@ class NewDoctorScreen extends React.Component {
     super();
   }
   render() {
+    this.props.navigation.setOptions({
+      headerTitle: "New " + this.props.route.params.name,
+    });
     return (
       <View style={styles.container}>
         <Form
@@ -118,4 +127,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NewDoctorScreen;
+export default NewItemScreen;

@@ -10,7 +10,7 @@ import { View, TouchableOpacity } from "react-native";
 import { Icon } from "react-native-elements";
 import LoginScreen from "../screens/LoginScreen";
 import HomeScreen from "../screens/HomeScreen";
-import NewDoctorScreen from "../screens/NewDoctorScreen";
+import NewItemScreen from "../screens/NewItemScreen";
 import EditFieldsScreen from "../screens/EditFieldsScreen";
 
 const Stack = createStackNavigator();
@@ -53,8 +53,8 @@ function AppStackNavigator() {
             headerShown: true,
             headerTitle: "New Doctor",
           }}
-          name={screenKeys.newDoctor}
-          component={NewDoctorScreen}
+          name={screenKeys.newItem}
+          component={NewItemScreen}
         />
         <Stack.Screen
           options={{
@@ -74,7 +74,7 @@ function AppStackNavigator() {
 export const screenKeys = {
   login: "loginscreen",
   home: "homescreen",
-  newDoctor: "newdoctor",
+  newItem: "newitem",
   editFields: "editfields",
 };
 

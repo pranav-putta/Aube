@@ -34,7 +34,7 @@ class EditFieldsScreen extends React.Component {
     firebase
       .functions()
       .httpsCallable("getFields")({
-        collection: "doctors",
+        collection: this.props.route.params.collection,
       })
       .then((response) => {
         this.setState({ formItems: response.data.data.fields });
@@ -42,7 +42,7 @@ class EditFieldsScreen extends React.Component {
       })
       .catch((response) => {
         this.setState({ showProgress: false });
-        alert(response.data.message);
+        alert(response);
       });
   }
 
@@ -87,7 +87,7 @@ class EditFieldsScreen extends React.Component {
       firebase
         .functions()
         .httpsCallable("updateFields")({
-          collection: "doctors",
+          collection: this.props.route.params.collection,
           data: { fields: this.state.formItems },
         })
         .then((response) => {
@@ -126,6 +126,7 @@ class EditFieldsScreen extends React.Component {
           />
         );
       },
+      headerTitle: "Edit " + this.props.route.params.name + " Fields",
     });
     return (
       <View style={styles.container}>

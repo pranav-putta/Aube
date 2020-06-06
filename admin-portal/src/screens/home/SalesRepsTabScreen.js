@@ -13,33 +13,58 @@ import MenuHeaderComponent from "../../navigation/MenuHeaderComponent";
 import DropDownPicker from "react-native-dropdown-picker";
 import colors from "../../util/colors";
 import { screenKeys } from "../../navigation/AppStackNavigator";
+import Button from "../../components/Button";
+import ExpandableItem from "../../components/ExpandableItem";
+import { material } from "../../util/colors";
+import firebase from "firebase";
 
 const filterItems = [
   { label: "Name", value: "label" },
   { label: "Area", value: "area" },
   { label: "Visits", value: "visits" },
 ];
-const sectionTitles = ["already visited", "unvisited"];
+const sectionTitles = ["Sales Reps"];
 const screenWidth = Dimensions.get("screen").width;
 
-class SalesRepTabScreen extends React.Component {
+class SalesRepsTabScreen extends React.Component {
+  refresh = () => {
+    this.setState({ refreshing: true });
+    firebase.functions().useFunctionsEmulator("http://localhost:5001");
+    firebase
+      .functions()
+      .httpsCallable("getAllDoctors")({
+        collection: "doctors",
+      })
+      .then((response) => {
+        this.setState({ data: response.data.data });
+        this.setState({ refreshing: false });
+      })
+      .catch((response) => {
+        this.setState({ refreshing: false });
+        alert(response.data.message);
+      });
+  };
+  componentDidMount() {
+    this.refresh();
+  }
+
+  deleteItem = (uid) => {
+    firebase
+      .functions()
+      .httpsCallable("deleteDoctor")({ uid: uid })
+      .then((response) => {
+        alert(JSON.stringify(response.data));
+        this.refresh();
+      })
+      .catch((response) => {
+        alert(response.data);
+        this.refresh();
+      });
+  };
+
   state = {
     refreshing: false,
-    data: [
-      [
-        { id: "1", name: "Dr. Pranav Putta" },
-        { id: "2", name: "Dr. Ramnath Putta" },
-      ],
-      [
-        { id: "4", name: "Benin" },
-        { id: "5", name: "Bhutan" },
-        { id: "6", name: "Bosnia" },
-        { id: "7", name: "Botswana" },
-        { id: "8", name: "Brazil" },
-        { id: "9", name: "Brunei" },
-        { id: "10", name: "Bulgaria" },
-      ],
-    ],
+    data: [],
     modalVisible: false,
   };
 
@@ -47,7 +72,9 @@ class SalesRepTabScreen extends React.Component {
     this.setState({ modalVisible: visible });
   }
 
-  GetSectionListItem = (item) => {};
+  GetSectionListItem = (item) => {
+    alert("hi");
+  };
   FlatListItemSeparator = () => {
     return (
       //Item Separator
@@ -60,9 +87,6 @@ class SalesRepTabScreen extends React.Component {
   ListHeader = ({ section }) => {
     return (
       <View style={styles.sectionHeader}>
-        <Text style={[styles.sectionHeaderCounter, { color: section.color }]}>
-          {section.counter}
-        </Text>
         <Text style={styles.sectionHeaderTitle}>
           {section.title.toUpperCase()}
         </Text>
@@ -72,21 +96,55 @@ class SalesRepTabScreen extends React.Component {
 
   ListItem = ({ item }) => {
     // Single Comes here which will be repeatative for the FlatListItems
+
     return (
-      <TouchableOpacity onPress={this.GetSectionListItem.bind(this, item)}>
-        <View style={styles.listItem}>
-          <View style={{ marginHorizontal: "5%" }}>
-            <Text style={styles.listItemTitle}>{item.name}</Text>
+      <ExpandableItem
+        style={styles.listItem}
+        expanded={item.expanded}
+        parent={
+          <TouchableOpacity
+            style={{ padding: 20 }}
+            onPress={() => {
+              item.expanded = !item.expanded;
+              this.forceUpdate();
+            }}
+          >
+            <View
+              style={{ flexDirection: "row", flex: 1, alignItems: "center" }}
+            >
+              <Text style={styles.listItemTitle}>
+                Dr. {item.first_name} {item.last_name}
+              </Text>
+              <Button
+                title="Delete"
+                uppercase={true}
+                callback={() => this.deleteItem(item.uid)}
+                containerStyle={styles.listItemButton}
+                textStyle={styles.listItemButtonText}
+              />
+            </View>
+          </TouchableOpacity>
+        }
+        child={
+          <View
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              flex: 1,
+              backgroundColor: material.Blue["100"].color,
+            }}
+          >
+            <Text style={styles.listItemTitle}>More information here</Text>
           </View>
-        </View>
-      </TouchableOpacity>
+        }
+      />
     );
   };
 
   render() {
     return (
       <View style={styles.container}>
-        <MenuHeaderComponent name="Doctors" nav={this.props.navigation} />
+        <MenuHeaderComponent name="Sales Reps" nav={this.props.navigation} />
         <View style={styles.filterContainer}>
           <DropDownPicker
             containerStyle={styles.filterPicker}
@@ -99,18 +157,24 @@ class SalesRepTabScreen extends React.Component {
           <TouchableOpacity
             style={styles.button}
             onPress={() => {
-              this.props.navigation.navigate(screenKeys.newDoctor);
+              this.props.navigation.navigate(screenKeys.newItem, {
+                collection: "sales-reps",
+                name: "Sales Rep",
+              });
             }}
           >
             <Text style={styles.buttonText}>New Sales Rep</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity style={styles.button} onPress={() => {}}>
             <Text style={styles.buttonText}>Import Data</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
             onPress={() => {
-              this.props.navigation.navigate(screenKeys.editFields, {collection: "sales-reps"});
+              this.props.navigation.navigate(screenKeys.editFields, {
+                collection: "sales-reps",
+                name: "Sales Rep",
+              });
             }}
           >
             <Text style={styles.buttonText}>Edit Fields</Text>
@@ -128,15 +192,9 @@ class SalesRepTabScreen extends React.Component {
           sections={[
             {
               title: sectionTitles[0],
-              data: this.state.data[0],
+              data: this.state.data,
               counter: 10,
               color: colors.green,
-            },
-            {
-              title: sectionTitles[1],
-              data: this.state.data[1],
-              counter: 320,
-              color: colors.red,
             },
           ]}
           renderSectionHeader={this.ListHeader}
@@ -193,20 +251,12 @@ const styles = StyleSheet.create({
   sectionHeader: {
     paddingBottom: 5,
     paddingTop: "5%",
-    borderColor: colors.darkGrey,
   },
   sectionHeaderTitle: {
     flex: 1,
     marginHorizontal: "5%",
     fontSize: 20,
     fontWeight: "bold",
-  },
-  sectionHeaderCounter: {
-    flex: 1,
-    fontSize: 20,
-    marginHorizontal: "5%",
-    fontWeight: "bold",
-    color: colors.tabColor,
   },
   listItemTitle: {
     fontSize: 18,
@@ -220,9 +270,22 @@ const styles = StyleSheet.create({
   },
   listItem: {
     flex: 1,
+    borderWidth: 1,
+    borderColor: colors.grey,
+    marginVertical: "0.5%",
+    borderRadius: 5,
+    marginHorizontal: "5%",
+  },
+  listItemButton: {
     padding: 10,
-    flexDirection: "row",
-    alignItems: "center",
+    right: 0,
+    position: "absolute",
+    marginHorizontal: "2%",
+  },
+  listItemButtonText: {
+    fontSize: 13,
+    fontWeight: "bold",
+    color: colors.blue,
   },
   list: {
     flex: 1,
@@ -233,4 +296,4 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
 });
-export default SalesRepTabScreen;
+export default SalesRepsTabScreen;

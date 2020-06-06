@@ -13,7 +13,7 @@ exports.verifySalesUser = functions.https.onCall((data, context) => {
 
   return admin
     .firestore()
-    .collection("sales-users")
+    .collection("sales-reps")
     .where("phoneNumber", "==", phoneNumber)
     .get()
     .then((response) => {
@@ -42,8 +42,8 @@ exports.updateFields = functions.https.onCall((data, context) => {
   let col = data.collection;
   return admin
     .firestore()
-    .collection(col)
-    .doc("fields")
+    .collection("fields")
+    .doc(col)
     .set(data.data)
     .then(() => {
       return { success: true, message: "updated successfully." };
@@ -57,8 +57,8 @@ exports.getFields = functions.https.onCall((data, context) => {
   let col = data.collection;
   return admin
     .firestore()
-    .collection(col)
-    .doc("fields")
+    .collection("fields")
+    .doc(col)
     .get()
     .then((doc) => {
       if (!doc.exists) {
@@ -73,5 +73,39 @@ exports.getFields = functions.https.onCall((data, context) => {
     })
     .catch((err) => {
       return { success: false, message: err, data: null };
+    });
+});
+
+exports.getAllDoctors = functions.https.onCall((data, context) => {
+  return admin
+    .firestore()
+    .collection("doctors")
+    .get()
+    .then((snapshot) => {
+      return {
+        success: true,
+        message: "successful",
+        data: snapshot.docs.map((doc) =>
+          Object.assign({ uid: doc.ref.id }, doc.data())
+        ),
+      };
+    })
+    .catch((err) => {
+      return { success: false, message: err, data: null };
+    });
+});
+
+exports.deleteDoctor = functions.https.onCall((data, context) => {
+  let id = data.uid;
+  return admin
+    .firestore()
+    .collection("doctors")
+    .doc(id)
+    .delete()
+    .then((response) => {
+      return { success: true, message: "deleted" };
+    })
+    .catch((response) => {
+      return { success: false, message: "couldn't delete" };
     });
 });
