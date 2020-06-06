@@ -7,67 +7,57 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { Icon } from "react-native-elements";
+import { ProgressDialog } from "../components/ProgressDialog";
 import Form from "../components/Form";
 import colors from "../util/colors";
 import firebase from "firebase";
 
 const Drawer = createDrawerNavigator();
 
-const doctorFormItems = [
-  {
-    key: "firstName",
-    label: "First Name",
-    placeholder: "First Name",
-  },
-  {
-    key: "lastName",
-    label: "Last Name",
-    placeholder: "Last Name",
-  },
-  {
-    key: "specialty",
-    label: "Specialty",
-    placeholder: "Specialty",
-  },
-  {
-    key: "address",
-    label: "Address",
-    placeholder: "Address",
-  },
-  {
-    key: "additionalInfo",
-    label: "Additional Information",
-    placeholder: "Additional Information",
-  },
-];
-
 class NewDoctorScreen extends React.Component {
   state = {
-    firstName: "",
-    lastName: "",
-    specialty: "",
-    address: "",
-    additionalInfo: "",
     verified: true,
     enabled: true,
+    showProgress: false,
+    data: { verified: true },
+    formItems: [],
   };
 
+  componentDidMount() {
+    this.setState({ showProgress: true });
+    firebase
+      .functions()
+      .httpsCallable("getFields")({
+        collection: "doctors",
+      })
+      .then((response) => {
+        this.setState({ formItems: response.data.data.fields });
+        this.setState({ showProgress: false });
+        alert(JSON.stringify(response.data));
+      })
+      .catch((response) => {
+        this.setState({ showProgress: false });
+        alert(response.data.message);
+      });
+  }
+
   changeFormState = (key, value) => {
-    this.setState({ [key]: value });
+    let x = this.state.data;
+    x[key] = value;
+    this.setState({ data: x });
   };
 
   submitData = () => {
     this.setState({ enabled: false });
     firebase
       .functions()
-      .httpsCallable("newDoctor")(this.state)
+      .httpsCallable("newDoctor")(this.state.data)
       .then((response) => {
         this.setState({ enabled: true });
         alert(response.data.success);
       })
       .catch((response) => {
-        alert(response.data.err);
+        alert(response.data.message);
         this.setState({ enabled: true });
       });
   };
@@ -80,7 +70,7 @@ class NewDoctorScreen extends React.Component {
       <View style={styles.container}>
         <Form
           containerStyle={styles.form}
-          formItems={doctorFormItems}
+          formItems={this.state.formItems}
           callback={this.changeFormState}
           enabled={this.state.enabled}
         />

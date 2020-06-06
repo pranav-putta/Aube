@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { Icon } from "react-native-elements";
-import Form from "../components/Form";
+import ProgressDialog from "../components/ProgressDialog";
 import colors from "../util/colors";
 import firebase from "firebase";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -24,10 +24,27 @@ const fieldTypes = [
 
 class EditFieldsScreen extends React.Component {
   state = {
-    currentID: 0,
+    showProgress: false,
     formItems: [],
     enabled: true,
   };
+
+  componentDidMount() {
+    this.setState({ showProgress: true });
+    firebase
+      .functions()
+      .httpsCallable("getFields")({
+        collection: "doctors",
+      })
+      .then((response) => {
+        this.setState({ formItems: response.data.data.fields });
+        this.setState({ showProgress: false });
+      })
+      .catch((response) => {
+        this.setState({ showProgress: false });
+        alert(response.data.message);
+      });
+  }
 
   validate = () => {
     for (var i = 0; i < this.state.formItems.length; i++) {
@@ -51,21 +68,22 @@ class EditFieldsScreen extends React.Component {
   };
 
   addField = () => {
+    const arr = this.state.formItems;
+    let id = arr.length > 0 ? arr[arr.length - 1].id + 1 : 0;
     this.setState((state) => {
       const list = state.formItems.push({
         name: "",
         fieldType: "",
         key: "",
-        id: this.state.currentID,
+        id: id,
       });
       return { list, value: "" };
     });
-    this.setState({ currentID: this.state.currentID + 1 });
   };
 
   submitForm = () => {
     this.setState({ enabled: false });
-    if (this.validate()) {
+    if (this.state.formItems.length > 0 && this.validate()) {
       firebase
         .functions()
         .httpsCallable("updateFields")({
@@ -74,13 +92,16 @@ class EditFieldsScreen extends React.Component {
         })
         .then((response) => {
           alert(JSON.stringify(response));
+          this.setState({ enabled: true });
         })
         .catch((err) => {
           alert(JSON.stringify(err));
+          this.setState({ enabled: true });
         });
     } else {
       this.setState({ enabled: true });
       alert("Please check you filled in all fields.");
+      this.setState({ showProgress: true });
     }
   };
 
@@ -108,6 +129,7 @@ class EditFieldsScreen extends React.Component {
     });
     return (
       <View style={styles.container}>
+        <ProgressDialog show={this.state.showProgress} />
         <View style={styles.form}>
           {this.state.formItems.map((item) => {
             return (
@@ -119,8 +141,16 @@ class EditFieldsScreen extends React.Component {
                 }}
               >
                 <TextInput
-                  style={{ flex: 1 }}
+                  style={{
+                    flex: 1,
+                    borderRadius: 5,
+                    paddingHorizontal: 10,
+                    marginHorizontal: 5,
+                    borderWidth: 1,
+                    borderColor: colors.grey,
+                  }}
                   placeholder="Field Name"
+                  value={item.name}
                   onChangeText={(text) =>
                     this.changeFormState("name", text, item.id)
                   }
@@ -128,6 +158,7 @@ class EditFieldsScreen extends React.Component {
                 <DropDownPicker
                   containerStyle={styles.picker}
                   items={fieldTypes}
+                  defaultValue={item.fieldType}
                   placeholder="Type"
                   itemStyle={{ backgroundColor: "white" }}
                   dropDownStyle={{ backgroundColor: "white" }}

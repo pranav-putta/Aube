@@ -22,7 +22,7 @@ const filterItems = [
 const sectionTitles = ["already visited", "unvisited"];
 const screenWidth = Dimensions.get("screen").width;
 
-class DoctorsTabScreen extends React.Component {
+class SalesRepTabScreen extends React.Component {
   state = {
     refreshing: false,
     data: [
@@ -102,7 +102,7 @@ class DoctorsTabScreen extends React.Component {
               this.props.navigation.navigate(screenKeys.newDoctor);
             }}
           >
-            <Text style={styles.buttonText}>New Doctor</Text>
+            <Text style={styles.buttonText}>New Sales Rep</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText}>Import Data</Text>
@@ -110,7 +110,7 @@ class DoctorsTabScreen extends React.Component {
           <TouchableOpacity
             style={styles.button}
             onPress={() => {
-              this.props.navigation.navigate(screenKeys.editFields);
+              this.props.navigation.navigate(screenKeys.editFields, {collection: "sales-reps"});
             }}
           >
             <Text style={styles.buttonText}>Edit Fields</Text>
@@ -233,4 +233,4 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
 });
-export default DoctorsTabScreen;
+export default SalesRepTabScreen;

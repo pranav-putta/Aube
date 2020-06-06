@@ -8,6 +8,7 @@ const colors = {
   lightBlue: "#bbdefb",
   blue: "#2196f3",
   white: "#fff",
+  translucent: 'rgba(0, 0, 0, 0.5)'
 };
 
 export default colors;

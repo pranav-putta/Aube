@@ -10,8 +10,8 @@ function Form(props) {
         return (
           <FormItem
             name={item.key}
-            label={item.label}
-            placeholder={item.placeholder}
+            label={item.name}
+            placeholder={item.name}
             callback={props.callback}
             enabled={props.enabled}
           />

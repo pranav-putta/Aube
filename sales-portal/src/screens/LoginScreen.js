@@ -41,6 +41,7 @@ class LoginScreen extends React.Component {
     super();
     this.loginHeight = new Animated.Value(START_HEIGHT);
     // called when user is signed in
+    auth().signOut();
     auth().onAuthStateChanged((user) => {
       // if user signed in, navigate to home screen
       if (user) {
@@ -348,7 +349,7 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.tabColor,
   },
   logoView: {
     justifyContent: "center",
