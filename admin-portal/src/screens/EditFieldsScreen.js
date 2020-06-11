@@ -14,8 +14,6 @@ import colors from "../util/colors";
 import firebase from "firebase";
 import DropDownPicker from "react-native-dropdown-picker";
 
-const Drawer = createDrawerNavigator();
-
 const fieldTypes = [
   { label: "Text", value: "string" },
   { label: "Large Text", value: "string" },
@@ -48,6 +46,11 @@ class EditFieldsScreen extends React.Component {
       });
   }
 
+  /**
+   * Validate that all fields are filled in
+   *
+   * @memberof EditFieldsScreen
+   */
   validate = () => {
     for (var i = 0; i < this.state.formItems.length; i++) {
       if (
@@ -60,6 +63,11 @@ class EditFieldsScreen extends React.Component {
     return true;
   };
 
+  /**
+   * manipulate form state and enter keys
+   *
+   * @memberof EditFieldsScreen
+   */
   changeFormState = (key, value, id) => {
     var newArr = this.state.formItems.slice();
     newArr[id][key] = value;
@@ -69,6 +77,11 @@ class EditFieldsScreen extends React.Component {
     this.setState({ formItems: newArr });
   };
 
+  /**
+   * add field to the form
+   *
+   * @memberof EditFieldsScreen
+   */
   addField = () => {
     const arr = this.state.formItems;
     let id = arr.length > 0 ? arr[arr.length - 1].id + 1 : 0;
@@ -83,6 +96,11 @@ class EditFieldsScreen extends React.Component {
     });
   };
 
+  /**
+   * submit the form to firebase database
+   *
+   * @memberof EditFieldsScreen
+   */
   submitForm = () => {
     this.setState({ enabled: false });
     if (this.state.formItems.length > 0 && this.validate()) {
@@ -106,9 +124,6 @@ class EditFieldsScreen extends React.Component {
     }
   };
 
-  constructor() {
-    super();
-  }
   render() {
     this.props.navigation.setOptions({
       headerRight: () => {

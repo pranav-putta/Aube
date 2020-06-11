@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import * as React from "react";
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   SectionList,
   RefreshControl,
   TouchableOpacity,
-  TouchableHighlight,
 } from "react-native";
 import MenuHeaderComponent from "../../navigation/MenuHeaderComponent";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -15,42 +14,74 @@ import colors from "../../util/colors";
 import { screenKeys } from "../../navigation/AppStackNavigator";
 import Button from "../../components/Button";
 import ExpandableItem from "../../components/ExpandableItem";
-import { material } from "../../util/colors";
 import firebase from "firebase";
 
-const filterItems = [
-  { label: "Name", value: "label" },
-  { label: "Area", value: "area" },
-  { label: "Visits", value: "visits" },
-];
-const sectionTitles = ["Doctors"];
 const screenWidth = Dimensions.get("screen").width;
 
-class DoctorTabScreen extends React.Component {
-  refresh = () => {
-    this.setState({ refreshing: true });
-    firebase
-      .functions()
-      .httpsCallable("getAllDoctors")({
-        collection: "doctors",
-      })
-      .then((response) => {
-        this.setState({ data: response.data.data });
-        this.setState({ refreshing: false });
-      })
-      .catch((response) => {
-        this.setState({ refreshing: false });
-        alert(response);
-      });
+class CollectionManagerScreen extends React.Component {
+  state = {
+    refreshing: false,
+    data: [],
+    expanded: {},
   };
+
+  constructor(props) {
+    super(props);
+
+    // deconstruct props
+    this.collection = props.mod.collection;
+    this.name = props.mod.name;
+    this.singularName = props.mod.singularName;
+    this.filterItems = props.mod.filterItems;
+    this.displayKeys = props.mod.displayKeys;
+    this.navigation = props.navigation;
+  }
+
+  /**
+   * Refresh data as soon as data is refreshed
+   *
+   * @memberof DBManagerScreen
+   */
   componentDidMount() {
     this.refresh();
   }
 
+  /**
+   * Refresh data according to the collection data
+   *
+   * @memberof CollectionManagerScreen
+   */
+  refresh = () => {
+    this.setState({ refreshing: true });
+    firebase
+      .functions()
+      .httpsCallable("getAll")({
+        collection: this.collection,
+      })
+      .then((response) => {
+        // collect data and set it
+        this.setState({ data: response.data.data });
+        this.setState({ refreshing: false });
+      })
+      .catch((response) => {
+        // throw error message
+        this.setState({ refreshing: false });
+        alert(response);
+      });
+  };
+
+  /**
+   * Delete particular item given the UID
+   *
+   * @memberof CollectionManagerScreen
+   */
   deleteItem = (uid) => {
     firebase
       .functions()
-      .httpsCallable("deleteDoctor")({ uid: uid })
+      .httpsCallable("delete")({
+        uid: uid,
+        collection: this.collection,
+      })
       .then((response) => {
         alert(JSON.stringify(response.data));
         this.refresh();
@@ -61,25 +92,11 @@ class DoctorTabScreen extends React.Component {
       });
   };
 
-  state = {
-    refreshing: false,
-    data: [],
-    modalVisible: false,
-    keys: [
-      ["name", "Name"],
-      ["address", "Address"],
-      ["phone_number", "Phone Number"],
-      ["specialty", "Specialty"],
-      ["qualification", "Qualification"],
-      ["practitioner_id", "Practitioner ID"],
-      ["verified", "Verified"],
-    ],
-  };
-
-  toggleModal(visible) {
-    this.setState({ modalVisible: visible });
-  }
-
+  /**
+   *  Separator between items in a list
+   *
+   * @memberof CollectionManagerScreen
+   */
   FlatListItemSeparator = () => {
     return (
       //Item Separator
@@ -89,6 +106,11 @@ class DoctorTabScreen extends React.Component {
     );
   };
 
+  /**
+   * Layout for the list header item
+   *
+   * @memberof CollectionManagerScreen
+   */
   ListHeader = ({ section }) => {
     return (
       <View style={styles.sectionHeader}>
@@ -99,9 +121,10 @@ class DoctorTabScreen extends React.Component {
     );
   };
 
-  // list item to display for each doctor
+  // list item to display for each item
   ListItem = ({ item }) => {
-    const rowItems = this.state.keys.slice(1).map((key) => {
+    //TODO: add verified property compatibility
+    const rowItems = this.displayKeys.slice(1).map((key) => {
       return (
         <View style={{ flexDirection: "row" }}>
           <Text style={styles.listItemKey}>{key[1]}:</Text>
@@ -112,20 +135,21 @@ class DoctorTabScreen extends React.Component {
     return (
       <ExpandableItem
         style={styles.listItem}
-        expanded={item.expanded}
+        expanded={this.state.expanded[item.uid]}
         parent={
           <TouchableOpacity
             style={{ padding: 20 }}
             onPress={() => {
-              item.expanded = !item.expanded;
-              this.forceUpdate();
+              let expanded = this.state.expanded;
+              expanded[item.uid] = !expanded[item.uid];
+              this.setState({ expanded: expanded });
             }}
           >
             <View
               style={{ flexDirection: "row", flex: 1, alignItems: "center" }}
             >
               <Text style={styles.listItemTitle}>
-                Dr. {item[this.state.keys[0][0]]}
+                Dr. {item[this.displayKeys[0][0]]}
               </Text>
               <Button
                 title="Delete"
@@ -138,9 +162,9 @@ class DoctorTabScreen extends React.Component {
                 title="Edit"
                 uppercase={true}
                 callback={() =>
-                  this.props.navigation.navigate(screenKeys.updateItem, {
-                    collection: "doctors",
-                    name: "Doctor",
+                  this.navigation.navigate(screenKeys.updateItem, {
+                    collection: this.collection,
+                    name: this.name,
                     data: item,
                   })
                 }
@@ -168,11 +192,11 @@ class DoctorTabScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <MenuHeaderComponent name="Doctors" nav={this.props.navigation} />
+        <MenuHeaderComponent name={this.name} nav={this.navigation} />
         <View style={styles.filterContainer}>
           <DropDownPicker
             containerStyle={styles.filterPicker}
-            items={filterItems}
+            items={this.filterItems}
             placeholder="Filter by"
             itemStyle={{ backgroundColor: "white" }}
             placeholderStyle={{ color: colors.blue }}
@@ -181,13 +205,13 @@ class DoctorTabScreen extends React.Component {
           <TouchableOpacity
             style={styles.button}
             onPress={() => {
-              this.props.navigation.navigate(screenKeys.newItem, {
-                collection: "doctors",
-                name: "Doctors",
+              this.navigation.navigate(screenKeys.newItem, {
+                collection: this.collection,
+                name: this.name,
               });
             }}
           >
-            <Text style={styles.buttonText}>New Doctor</Text>
+            <Text style={styles.buttonText}>New {this.singularName}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={() => {}}>
             <Text style={styles.buttonText}>Import Data</Text>
@@ -195,9 +219,9 @@ class DoctorTabScreen extends React.Component {
           <TouchableOpacity
             style={styles.button}
             onPress={() => {
-              this.props.navigation.navigate(screenKeys.editFields, {
-                collection: "doctors",
-                name: "Doctors",
+              this.navigation.navigate(screenKeys.editFields, {
+                collection: this.collection,
+                name: this.name,
               });
             }}
           >
@@ -215,7 +239,7 @@ class DoctorTabScreen extends React.Component {
           ItemSeparatorComponent={this.FlatListItemSeparator}
           sections={[
             {
-              title: sectionTitles[0],
+              title: this.name,
               data: this.state.data,
               counter: 10,
               color: colors.green,
@@ -229,6 +253,27 @@ class DoctorTabScreen extends React.Component {
     );
   }
 }
+
+CollectionManagerScreen.defaultProps = {
+  mod: {
+    collection: "doctors",
+    name: "Doctors",
+    filterItems: [
+      { label: "Name", value: "label" },
+      { label: "Area", value: "area" },
+      { label: "Visits", value: "visits" },
+    ],
+    displayKeys: [
+      ["name", "Name"],
+      ["address", "Address"],
+      ["phone_number", "Phone Number"],
+      ["specialty", "Specialty"],
+      ["qualification", "Qualification"],
+      ["practitioner_id", "Practitioner ID"],
+      ["verified", "Verified"],
+    ],
+  },
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -312,4 +357,4 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
 });
-export default DoctorTabScreen;
+export default CollectionManagerScreen;

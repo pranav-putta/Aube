@@ -74,7 +74,7 @@ class CheckInTabScreen extends React.Component {
 
   RefreshDoctors = () => {
     functions()
-      .httpsCallable("getAllDoctors")()
+      .httpsCallable("getAll")({ collection: "doctors" })
       .then((response) => {
         let data = response.data.raw;
         this.setState({ allDoctors: data });

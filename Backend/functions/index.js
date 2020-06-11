@@ -140,10 +140,10 @@ exports.getFields = functions.https.onCall((data, context) => {
     });
 });
 
-exports.getAllDoctors = functions.https.onCall((data, context) => {
+exports.getAll = functions.https.onCall((data, context) => {
   return admin
     .database()
-    .ref("doctors")
+    .ref(data.collection)
     .once("value")
     .then((snapshot) => {
       // convert into a list
@@ -164,6 +164,7 @@ exports.getAllDoctors = functions.https.onCall((data, context) => {
     });
 });
 
+/*
 exports.getAllReports = functions.https.onCall((data, context) => {
   return admin
     .database()
@@ -186,21 +187,6 @@ exports.getAllReports = functions.https.onCall((data, context) => {
       return { success: false, message: err, data: null };
     });
 });
-
-exports.deleteDoctor = functions.https.onCall((data, context) => {
-  let id = data.uid;
-  return admin
-    .database()
-    .ref("doctors/" + id)
-    .remove()
-    .then((response) => {
-      return { success: true, message: "deleted" };
-    })
-    .catch((response) => {
-      return { success: false, message: "couldn't delete" };
-    });
-});
-
 exports.getAllSalesReps = functions.https.onCall((data, context) => {
   return admin
     .database()
@@ -222,8 +208,24 @@ exports.getAllSalesReps = functions.https.onCall((data, context) => {
     .catch((err) => {
       return { success: false, message: err, data: null };
     });
+});*/
+
+exports.deleteDoctor = functions.https.onCall((data, context) => {
+  let id = data.uid;
+  let col = data.collection;
+  return admin
+    .database()
+    .ref(col + "/" + id)
+    .remove()
+    .then((response) => {
+      return { success: true, message: "deleted" };
+    })
+    .catch((response) => {
+      return { success: false, message: "couldn't delete" };
+    });
 });
 
+/*
 exports.deleteSalesRep = functions.https.onCall((data, context) => {
   let id = data.uid;
   return admin
@@ -250,7 +252,7 @@ exports.deleteReport = functions.https.onCall((data, context) => {
     .catch((response) => {
       return { success: false, message: "couldn't delete" };
     });
-});
+});*/
 
 exports.getSalesRep = functions.https.onCall((data, context) => {
   return admin

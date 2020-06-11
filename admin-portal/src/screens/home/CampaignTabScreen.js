@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import MenuHeaderComponent from "../../navigation/MenuHeaderComponent";
-import colors from "../../util/colors";
+import colors, { material } from "../../util/colors";
 import firebase from "firebase";
 import { CheckBox, Icon } from "react-native-elements";
 import Button from "../../components/Button";
@@ -24,11 +24,16 @@ class CampaignTabScreen extends React.Component {
     enabled: true,
   };
 
+  /**
+   * Get all doctors
+   *
+   * @memberof CampaignTabScreen
+   */
   refreshDoctors = () => {
     this.setState({ refreshing: true });
     firebase
       .functions()
-      .httpsCallable("getAllDoctors")({
+      .httpsCallable("getAll")({
         collection: "doctors",
       })
       .then((response) => {
@@ -41,16 +46,20 @@ class CampaignTabScreen extends React.Component {
       });
   };
 
+  /**
+   * Get all sales reps
+   *
+   * @memberof CampaignTabScreen
+   */
   refreshSalesReps = () => {
     this.setState({ refreshing: true });
     firebase
       .functions()
-      .httpsCallable("getAllSalesReps")({
+      .httpsCallable("getAll")({
         collection: "sales-reps",
       })
       .then((response) => {
         let data = response.data.data;
-        let x = [];
         data.forEach((element) => {
           if (!("campaigns" in element)) {
             element.campaigns = [];
@@ -444,9 +453,11 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
   },
   title: {
-    margin: 20,
+    padding: 15,
     fontWeight: "bold",
     fontSize: 20,
+    color: "white",
+    backgroundColor: material.Orange["600"].color,
   },
   button: {
     right: 0,

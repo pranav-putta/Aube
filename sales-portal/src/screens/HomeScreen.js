@@ -4,7 +4,6 @@
  * @date: 06/01/2020
  */
 import * as React from "react";
-import { StyleSheet, View, Text } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import colors from "../util/colors";
 import { Icon } from "react-native-elements";
