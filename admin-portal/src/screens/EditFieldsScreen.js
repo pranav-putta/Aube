@@ -17,7 +17,9 @@ import DropDownPicker from "react-native-dropdown-picker";
 const Drawer = createDrawerNavigator();
 
 const fieldTypes = [
-  { label: "Characters", value: "string" },
+  { label: "Text", value: "string" },
+  { label: "Large Text", value: "string" },
+  { label: "Auto", value: "auto" },
   { label: "Number", value: "number" },
   { label: "Location", value: "location" },
 ];
@@ -37,20 +39,20 @@ class EditFieldsScreen extends React.Component {
         collection: this.props.route.params.collection,
       })
       .then((response) => {
-        this.setState({ formItems: response.data.data.fields });
+        this.setState({ formItems: response.data.data });
         this.setState({ showProgress: false });
       })
       .catch((response) => {
         this.setState({ showProgress: false });
-        alert(response);
+        alert("Um" + response);
       });
   }
 
   validate = () => {
     for (var i = 0; i < this.state.formItems.length; i++) {
       if (
-        this.state.formItems[i].name === "" ||
-        this.state.formItems[i].type === ""
+        this.state.formItems[i].name == "" ||
+        this.state.formItems[i].fieldType == ""
       ) {
         return false;
       }
@@ -88,10 +90,10 @@ class EditFieldsScreen extends React.Component {
         .functions()
         .httpsCallable("updateFields")({
           collection: this.props.route.params.collection,
-          data: { fields: this.state.formItems },
+          data: this.state.formItems,
         })
         .then((response) => {
-          alert(JSON.stringify(response));
+          alert("Success");
           this.setState({ enabled: true });
         })
         .catch((err) => {
@@ -101,7 +103,6 @@ class EditFieldsScreen extends React.Component {
     } else {
       this.setState({ enabled: true });
       alert("Please check you filled in all fields.");
-      this.setState({ showProgress: true });
     }
   };
 

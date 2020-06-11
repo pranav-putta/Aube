@@ -4,12 +4,14 @@ import { Input } from "react-native-elements";
 import colors from "../util/colors";
 
 function Form(props) {
+  // if values are inputted, display them
   return (
     <ScrollView style={props.containerStyle}>
       {props.formItems.map((item) => {
         return (
           <FormItem
             name={item.key}
+            ival={props.values[item.key]}
             label={item.name}
             placeholder={item.name}
             callback={props.callback}
@@ -24,19 +26,25 @@ function Form(props) {
 Form.defaultProps = {
   containerStyle: { flex: 1 },
   formItems: [],
+  values: {},
 };
 
-function FormItem({ name, label, placeholder, callback, enabled }) {
+function FormItem({ name, label, ival, placeholder, callback, enabled }) {
+  const [inputValue, setInputValue] = React.useState(ival);
   return (
     <Input
       disabled={!enabled}
       key={name}
+      value={inputValue}
       label={label.toUpperCase()}
       placeholder={placeholder}
       containerStyle={styles.containerStyle}
       inputContainerStyle={styles.inputStyle}
       labelStyle={styles.labelStyle}
-      onChangeText={(text) => callback(name, text)}
+      onChangeText={(text) => {
+        setInputValue(text);
+        callback(name, text);
+      }}
     />
   );
 }

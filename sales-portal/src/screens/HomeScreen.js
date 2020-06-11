@@ -14,6 +14,7 @@ import DoctorsTabScreen from "./DoctorsTabScreen";
 const Tab = createBottomTabNavigator();
 
 export default function HomeScreen() {
+  console.disableYellowBox = true;
   return (
     <Tab.Navigator
       tabBarOptions={{

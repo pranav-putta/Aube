@@ -18,21 +18,17 @@ import ExpandableItem from "../../components/ExpandableItem";
 import { material } from "../../util/colors";
 import firebase from "firebase";
 
-const filterItems = [
-  { label: "Name", value: "label" },
-  { label: "Area", value: "area" },
-  { label: "Visits", value: "visits" },
-];
-const sectionTitles = ["Doctors"];
+const filterItems = [{ label: "Name", value: "label" }];
+const sectionTitles = ["Reports"];
 const screenWidth = Dimensions.get("screen").width;
 
-class DoctorTabScreen extends React.Component {
+class VisitsTabScreen extends React.Component {
   refresh = () => {
     this.setState({ refreshing: true });
     firebase
       .functions()
-      .httpsCallable("getAllDoctors")({
-        collection: "doctors",
+      .httpsCallable("getAllReports")({
+        collection: "reports",
       })
       .then((response) => {
         this.setState({ data: response.data.data });
@@ -50,7 +46,7 @@ class DoctorTabScreen extends React.Component {
   deleteItem = (uid) => {
     firebase
       .functions()
-      .httpsCallable("deleteDoctor")({ uid: uid })
+      .httpsCallable("deleteReport")({ uid: uid })
       .then((response) => {
         alert(JSON.stringify(response.data));
         this.refresh();
@@ -69,10 +65,6 @@ class DoctorTabScreen extends React.Component {
       ["name", "Name"],
       ["address", "Address"],
       ["phone_number", "Phone Number"],
-      ["specialty", "Specialty"],
-      ["qualification", "Qualification"],
-      ["practitioner_id", "Practitioner ID"],
-      ["verified", "Verified"],
     ],
   };
 
@@ -99,7 +91,7 @@ class DoctorTabScreen extends React.Component {
     );
   };
 
-  // list item to display for each doctor
+  // list item to display for each sales rep
   ListItem = ({ item }) => {
     const rowItems = this.state.keys.slice(1).map((key) => {
       return (
@@ -139,8 +131,8 @@ class DoctorTabScreen extends React.Component {
                 uppercase={true}
                 callback={() =>
                   this.props.navigation.navigate(screenKeys.updateItem, {
-                    collection: "doctors",
-                    name: "Doctor",
+                    collection: "reports",
+                    name: "Reports",
                     data: item,
                   })
                 }
@@ -155,7 +147,7 @@ class DoctorTabScreen extends React.Component {
             style={{
               padding: 15,
               flex: 1,
-              backgroundColor: colors.grey,
+              backgroundColor: material.Blue["100"].color,
             }}
           >
             {rowItems}
@@ -168,7 +160,7 @@ class DoctorTabScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <MenuHeaderComponent name="Doctors" nav={this.props.navigation} />
+        <MenuHeaderComponent name="Reports" nav={this.props.navigation} />
         <View style={styles.filterContainer}>
           <DropDownPicker
             containerStyle={styles.filterPicker}
@@ -182,12 +174,12 @@ class DoctorTabScreen extends React.Component {
             style={styles.button}
             onPress={() => {
               this.props.navigation.navigate(screenKeys.newItem, {
-                collection: "doctors",
-                name: "Doctors",
+                collection: "reports",
+                name: "Reports",
               });
             }}
           >
-            <Text style={styles.buttonText}>New Doctor</Text>
+            <Text style={styles.buttonText}>New Report</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={() => {}}>
             <Text style={styles.buttonText}>Import Data</Text>
@@ -196,8 +188,8 @@ class DoctorTabScreen extends React.Component {
             style={styles.button}
             onPress={() => {
               this.props.navigation.navigate(screenKeys.editFields, {
-                collection: "doctors",
-                name: "Doctors",
+                collection: "reports",
+                name: "Reports",
               });
             }}
           >
@@ -312,4 +304,4 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
 });
-export default DoctorTabScreen;
+export default VisitsTabScreen;

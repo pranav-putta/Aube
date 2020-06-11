@@ -11,28 +11,22 @@ import SearchHeader from "./components/SearchHeaderComponent";
 import colors from "../util/colors";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Icon } from "react-native-elements";
+import functions from "@react-native-firebase/functions";
 
-const sectionTitles = ["already visited", "unvisited"];
+const sectionTitles = ["Doctors", "unvisited"];
 
 class CheckInTabScreen extends React.Component {
   state = {
     refreshing: false,
-    data: [
-      [
-        { id: "1", name: "Dr. Pranav Putta" },
-        { id: "2", name: "Dr. Ramnath Putta" },
-      ],
-      [
-        { id: "4", name: "Benin" },
-        { id: "5", name: "Bhutan" },
-        { id: "6", name: "Bosnia" },
-        { id: "7", name: "Botswana" },
-        { id: "8", name: "Brazil" },
-        { id: "9", name: "Brunei" },
-        { id: "10", name: "Bulgaria" },
-      ],
-    ],
+    userData: {},
+    allDoctors: [],
+    doctorUIDs: {},
+    campaignDoctors: [],
   };
+
+  componentDidMount() {
+    this.onRefresh();
+  }
 
   GetSectionListItem = (item) => {
     this.props.navigation.navigate("CheckInForm", { data: item });
@@ -70,7 +64,6 @@ class CheckInTabScreen extends React.Component {
 
           <View style={{ marginHorizontal: "5%" }}>
             <Text style={styles.listItemTitle}>{item.name}</Text>
-            <Text style={styles.listItemSubtitle}>05/20/2020</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -79,7 +72,61 @@ class CheckInTabScreen extends React.Component {
 
   searchData = () => {};
 
-  onRefresh = () => {};
+  RefreshDoctors = () => {
+    functions()
+      .httpsCallable("getAllDoctors")()
+      .then((response) => {
+        let data = response.data.raw;
+        this.setState({ allDoctors: data });
+        let doctors = [];
+        let doctorUIDKeys = Object.keys(this.state.doctorUIDs);
+        doctorUIDKeys.forEach((key) => {
+          if (this.state.doctorUIDs[key]) {
+            doctors.push(this.state.allDoctors[key]);
+          }
+        });
+        this.setState({ campaignDoctors: doctors });
+      })
+
+      .catch((response) => {
+        this.setState({ refreshing: false });
+        alert(JSON.stringify(response));
+      });
+    this.setState({ refreshing: false });
+  };
+
+  onRefresh = () => {
+    this.setState({ refreshing: true });
+    functions()
+      .httpsCallable("getSalesRep")({ uid: "-M9UhCFbFgvd_ANsK5v-" })
+      .then((response) => {
+        this.setState({ userData: response.data.data });
+        // get current campaign
+        let data = response.data.data;
+        let active = "activeCampaign" in data ? data.activeCampaign : -1;
+        if (active != -1) {
+          let current = null;
+          for (var i = 0; i < data.campaigns.length; i++) {
+            if (data.campaigns[i].id == active) {
+              current = data.campaigns[i];
+            }
+          }
+          if (current != null) {
+            let doctorUIDs = current.doctors;
+            this.setState({ doctorUIDs: doctorUIDs });
+            this.RefreshDoctors();
+          }
+        } else {
+          this.setState({ doctors: [] });
+        }
+
+        this.setState({ refreshing: false });
+      })
+      .catch((response) => {
+        this.setState({ refreshing: false });
+        alert(JSON.stringify(response));
+      });
+  };
   render() {
     return (
       <View style={styles.container}>
@@ -96,15 +143,9 @@ class CheckInTabScreen extends React.Component {
           sections={[
             {
               title: sectionTitles[0],
-              data: this.state.data[0],
+              data: this.state.campaignDoctors,
               counter: 10,
               color: colors.green,
-            },
-            {
-              title: sectionTitles[1],
-              data: this.state.data[1],
-              counter: 320,
-              color: colors.red,
             },
           ]}
           renderSectionHeader={this.ListHeader}

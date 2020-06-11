@@ -48,7 +48,7 @@ ExpandableItem.defaultProps = {
   style: {},
   parent: [],
   child: [],
-  maxHeight: 100,
+  maxHeight: 175,
   expanded: false,
 };
 

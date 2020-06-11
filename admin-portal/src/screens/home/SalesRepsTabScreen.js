@@ -29,11 +29,10 @@ const screenWidth = Dimensions.get("screen").width;
 class SalesRepsTabScreen extends React.Component {
   refresh = () => {
     this.setState({ refreshing: true });
-    firebase.functions().useFunctionsEmulator("http://localhost:5001");
     firebase
       .functions()
-      .httpsCallable("getAllDoctors")({
-        collection: "doctors",
+      .httpsCallable("getAllSalesReps")({
+        collection: "sales-reps",
       })
       .then((response) => {
         this.setState({ data: response.data.data });
@@ -41,7 +40,7 @@ class SalesRepsTabScreen extends React.Component {
       })
       .catch((response) => {
         this.setState({ refreshing: false });
-        alert(response.data.message);
+        alert(response);
       });
   };
   componentDidMount() {
@@ -51,7 +50,7 @@ class SalesRepsTabScreen extends React.Component {
   deleteItem = (uid) => {
     firebase
       .functions()
-      .httpsCallable("deleteDoctor")({ uid: uid })
+      .httpsCallable("deleteSalesRep")({ uid: uid })
       .then((response) => {
         alert(JSON.stringify(response.data));
         this.refresh();
@@ -66,15 +65,17 @@ class SalesRepsTabScreen extends React.Component {
     refreshing: false,
     data: [],
     modalVisible: false,
+    keys: [
+      ["name", "Name"],
+      ["address", "Address"],
+      ["phone_number", "Phone Number"],
+    ],
   };
 
   toggleModal(visible) {
     this.setState({ modalVisible: visible });
   }
 
-  GetSectionListItem = (item) => {
-    alert("hi");
-  };
   FlatListItemSeparator = () => {
     return (
       //Item Separator
@@ -94,9 +95,16 @@ class SalesRepsTabScreen extends React.Component {
     );
   };
 
+  // list item to display for each sales rep
   ListItem = ({ item }) => {
-    // Single Comes here which will be repeatative for the FlatListItems
-
+    const rowItems = this.state.keys.slice(1).map((key) => {
+      return (
+        <View style={{ flexDirection: "row" }}>
+          <Text style={styles.listItemKey}>{key[1]}:</Text>
+          <Text style={styles.listItemValue}>{item[key[0]]}</Text>
+        </View>
+      );
+    });
     return (
       <ExpandableItem
         style={styles.listItem}
@@ -113,12 +121,25 @@ class SalesRepsTabScreen extends React.Component {
               style={{ flexDirection: "row", flex: 1, alignItems: "center" }}
             >
               <Text style={styles.listItemTitle}>
-                Dr. {item.first_name} {item.last_name}
+                Dr. {item[this.state.keys[0][0]]}
               </Text>
               <Button
                 title="Delete"
                 uppercase={true}
                 callback={() => this.deleteItem(item.uid)}
+                containerStyle={styles.listItemButton}
+                textStyle={styles.listItemButtonText}
+              />
+              <Button
+                title="Edit"
+                uppercase={true}
+                callback={() =>
+                  this.props.navigation.navigate(screenKeys.updateItem, {
+                    collection: "sales-reps",
+                    name: "Sales Reps",
+                    data: item,
+                  })
+                }
                 containerStyle={styles.listItemButton}
                 textStyle={styles.listItemButtonText}
               />
@@ -128,13 +149,12 @@ class SalesRepsTabScreen extends React.Component {
         child={
           <View
             style={{
-              justifyContent: "center",
-              alignItems: "center",
+              padding: 15,
               flex: 1,
               backgroundColor: material.Blue["100"].color,
             }}
           >
-            <Text style={styles.listItemTitle}>More information here</Text>
+            {rowItems}
           </View>
         }
       />
@@ -159,7 +179,7 @@ class SalesRepsTabScreen extends React.Component {
             onPress={() => {
               this.props.navigation.navigate(screenKeys.newItem, {
                 collection: "sales-reps",
-                name: "Sales Rep",
+                name: "Sales Reps",
               });
             }}
           >
@@ -206,19 +226,6 @@ class SalesRepsTabScreen extends React.Component {
   }
 }
 
-const modalStyles = StyleSheet.create({
-  modal: {
-    flex: 1,
-    alignItems: "center",
-    backgroundColor: "#f7021a",
-    padding: 100,
-  },
-  text: {
-    color: "#3f2949",
-    marginTop: 10,
-  },
-});
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -258,9 +265,15 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
   },
-  listItemTitle: {
-    fontSize: 18,
-    color: "#000",
+  listItemKey: {
+    color: "black",
+    margin: 5,
+    fontWeight: "bold",
+  },
+  listItemValue: {
+    color: "black",
+    margin: 5,
+    marginHorizontal: 10,
   },
   listItemSubtitle: {
     fontSize: 16,
@@ -279,7 +292,6 @@ const styles = StyleSheet.create({
   listItemButton: {
     padding: 10,
     right: 0,
-    position: "absolute",
     marginHorizontal: "2%",
   },
   listItemButtonText: {

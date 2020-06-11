@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     height: 150,
     alignSelf: "center",
     backgroundColor: "white",
-    padding: "3.5%",
+    padding: 20,
     borderRadius: 5,
   },
   title: {

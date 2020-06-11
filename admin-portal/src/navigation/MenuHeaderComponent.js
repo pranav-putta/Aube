@@ -21,11 +21,12 @@ export const HeaderElements = ({ name, nav }) => {
     </View>
   );
 };
-export default function MenuHeaderComponent({ name, nav, containerStyle }) {
+export default function MenuHeaderComponent({ name, nav, containerStyle, rightButton }) {
   return (
     <Header
       containerStyle={[styles.headerContainer, containerStyle]}
       leftComponent={HeaderElements({ name, nav })}
+      rightComponent={rightButton}
       backgroundColor={colors.white}
     />
   );

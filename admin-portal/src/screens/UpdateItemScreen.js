@@ -14,24 +14,23 @@ import firebase from "firebase";
 
 const Drawer = createDrawerNavigator();
 
-class NewItemScreen extends React.Component {
+class UpdateItemScreen extends React.Component {
   state = {
     verified: true,
     enabled: true,
     showProgress: false,
-    data: { verified: true },
     formItems: [],
   };
 
   componentDidMount() {
     this.setState({ enabled: false });
+    this.setState({ data: this.props.route.params.data });
     firebase
       .functions()
       .httpsCallable("getFields")({
         collection: this.props.route.params.collection,
       })
       .then((response) => {
-        alert(JSON.stringify(response))
         this.setState({ formItems: response.data.data });
         this.setState({ enabled: true });
       })
@@ -50,20 +49,17 @@ class NewItemScreen extends React.Component {
   submitData = () => {
     this.setState({ enabled: false });
     let col = this.props.route.params.collection;
-    let f = "newDoctor";
+    let f = "updateDoctor";
     if (col == "doctors") {
-      f = "newDoctor";
+      f = "updateDoctor";
     } else if (col == "sales-reps") {
-      f = "newSalesRep";
-    } else if (col == "reports") {
-      f = "newReport"
+      f = "updateSalesRep";
     }
     firebase
       .functions()
       .httpsCallable(f)(this.state.data)
       .then((response) => {
         this.setState({ enabled: true });
-        alert(response.data.success);
       })
       .catch((response) => {
         this.setState({ enabled: true });
@@ -75,13 +71,14 @@ class NewItemScreen extends React.Component {
   }
   render() {
     this.props.navigation.setOptions({
-      headerTitle: "New " + this.props.route.params.name,
+      headerTitle: "Update " + this.props.route.params.name,
     });
     return (
       <View style={styles.container}>
         <Form
           containerStyle={styles.form}
           formItems={this.state.formItems}
+          values={this.props.route.params.data}
           callback={this.changeFormState}
           enabled={this.state.enabled}
         />
@@ -91,7 +88,7 @@ class NewItemScreen extends React.Component {
           onPress={this.submitData}
         >
           {this.state.enabled ? (
-            <Text style={styles.buttonText}>Submit</Text>
+            <Text style={styles.buttonText}>Update</Text>
           ) : (
             <ActivityIndicator size="small" color={colors.white} />
           )}
@@ -129,4 +126,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default NewItemScreen;
+export default UpdateItemScreen;

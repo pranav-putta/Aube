@@ -1,47 +1,61 @@
 import * as React from "react";
-import { View, StyleSheet, TextInput } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import { Input } from "react-native-elements";
 import colors from "../../util/colors";
-import { ScrollView } from "react-native-gesture-handler";
 
 function Form(props) {
+  // if values are inputted, display them
   return (
     <ScrollView style={props.containerStyle}>
       {props.formItems.map((item) => {
-        return (
-          <FormItem
-            name={item.key}
-            label={item.label}
-            placeholder={item.placeholder}
-          />
-        );
+        if (item.fieldType != "auto") {
+          return (
+            <FormItem
+              name={item.key}
+              ival={props.values[item.key]}
+              type={item.fieldType}
+              label={item.name}
+              placeholder={item.name}
+              callback={props.callback}
+              enabled={props.enabled}
+            />
+          );
+        }
       })}
     </ScrollView>
   );
 }
 
 Form.defaultProps = {
-  containerStyle: {},
+  containerStyle: { flex: 1 },
   formItems: [],
+  values: {},
 };
 
-FormItemInput = () => {
-  return <View />;
-};
-
-function FormItem({ name, label, placeholder }) {
+function FormItem({ name, label, ival, placeholder, callback, enabled }) {
+  const [inputValue, setInputValue] = React.useState(ival);
   return (
     <Input
+      disabled={!enabled}
       key={name}
+      value={inputValue}
       label={label.toUpperCase()}
       placeholder={placeholder}
+      containerStyle={styles.containerStyle}
       inputContainerStyle={styles.inputStyle}
       labelStyle={styles.labelStyle}
+      onChangeText={(text) => {
+        setInputValue(text);
+        callback(name, text);
+      }}
     />
   );
 }
 
 const styles = StyleSheet.create({
+  containerStyle: {
+    marginTop: "2.5%",
+  },
   inputStyle: {
     backgroundColor: colors.grey,
     marginTop: 5,

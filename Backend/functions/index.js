@@ -1,7 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 
-admin.initializeApp();
+const app = admin.initializeApp();
 
 /**
  * server function to validate that the user is real
@@ -27,9 +27,82 @@ exports.verifySalesUser = functions.https.onCall((data, context) => {
 exports.newDoctor = functions.https.onCall((data, context) => {
   data.status = [{ action: "created", time: Date.now().toString() }];
   return admin
-    .firestore()
-    .collection("doctors")
-    .add(data)
+    .database()
+    .ref("doctors")
+    .push(data)
+    .then((ref) => {
+      return { success: true, id: ref.id, message: "updated successfully." };
+    })
+    .catch((err) => {
+      return { success: false, id: "", message: err };
+    });
+});
+
+exports.updateDoctor = functions.https.onCall((data, context) => {
+  return admin
+    .database()
+    .ref("doctors/" + data.uid)
+    .set(data)
+    .then((ref) => {
+      return { success: true, id: ref.id, message: "updated successfully." };
+    })
+    .catch((err) => {
+      return { success: false, id: "", message: err };
+    });
+});
+
+exports.updateSalesRep = functions.https.onCall((data, context) => {
+  return admin
+    .database()
+    .ref("sales-reps/" + data.uid)
+    .set(data)
+    .then((ref) => {
+      return { success: true, id: ref.id, message: "updated successfully." };
+    })
+    .catch((err) => {
+      return { success: false, id: "", message: err };
+    });
+});
+
+exports.updateAllSalesReps = functions.https.onCall((data, context) => {
+  var updates = {};
+  data.data.forEach((element) => {
+    updates["sales-reps/" + element.uid] = element;
+  });
+  return admin
+    .database()
+    .ref()
+    .update(updates)
+    .then((ref) => {
+      return { success: true, id: ref.id, message: "updated successfully." };
+    })
+    .catch((err) => {
+      return { success: false, id: "", message: err };
+    });
+});
+
+exports.newSalesRep = functions.https.onCall((data, context) => {
+  data.status = [{ action: "created", time: Date.now().toString() }];
+  data.campaigns = [];
+  return admin
+    .database()
+    .ref("sales-reps")
+    .push(data)
+    .then((ref) => {
+      return { success: true, id: ref.id, message: "updated successfully." };
+    })
+    .catch((err) => {
+      return { success: false, id: "", message: err };
+    });
+});
+
+exports.newReport = functions.https.onCall((data, context) => {
+  data.status = [{ action: "created", time: Date.now().toString() }];
+  data.campaigns = [];
+  return admin
+    .database()
+    .ref("reports")
+    .push(data)
     .then((ref) => {
       return { success: true, id: ref.id, message: "updated successfully." };
     })
@@ -40,10 +113,9 @@ exports.newDoctor = functions.https.onCall((data, context) => {
 
 exports.updateFields = functions.https.onCall((data, context) => {
   let col = data.collection;
-  return admin
-    .firestore()
-    .collection("fields")
-    .doc(col)
+  return app
+    .database()
+    .ref("/fields/" + col)
     .set(data.data)
     .then(() => {
       return { success: true, message: "updated successfully." };
@@ -55,39 +127,59 @@ exports.updateFields = functions.https.onCall((data, context) => {
 
 exports.getFields = functions.https.onCall((data, context) => {
   let col = data.collection;
-  return admin
-    .firestore()
-    .collection("fields")
-    .doc(col)
-    .get()
-    .then((doc) => {
-      if (!doc.exists) {
-        return {
-          success: true,
-          message: "couldn't find document",
-          data: { fields: [] },
-        };
-      } else {
-        return { success: true, message: "successful", data: doc.data() };
+  return app
+    .database()
+    .ref("/fields/" + col)
+    .once("value")
+    .then((snap) => {
+      let val = snap.val();
+      if (val === "" || val === null) {
+        val = [];
       }
+      return { success: true, data: val };
+    });
+});
+
+exports.getAllDoctors = functions.https.onCall((data, context) => {
+  return admin
+    .database()
+    .ref("doctors")
+    .once("value")
+    .then((snapshot) => {
+      // convert into a list
+      let val = snapshot.val();
+      let sanitizedData = [];
+      for (var key in val) {
+        sanitizedData.push(Object.assign({ uid: key }, val[key]));
+      }
+      return {
+        success: true,
+        message: "successful",
+        data: sanitizedData,
+        raw: val,
+      };
     })
     .catch((err) => {
       return { success: false, message: err, data: null };
     });
 });
 
-exports.getAllDoctors = functions.https.onCall((data, context) => {
+exports.getAllReports = functions.https.onCall((data, context) => {
   return admin
-    .firestore()
-    .collection("doctors")
-    .get()
+    .database()
+    .ref("reports")
+    .once("value")
     .then((snapshot) => {
+      // convert into a list
+      let val = snapshot.val();
+      let sanitizedData = [];
+      for (var key in val) {
+        sanitizedData.push(Object.assign({ uid: key }, val[key]));
+      }
       return {
         success: true,
         message: "successful",
-        data: snapshot.docs.map((doc) =>
-          Object.assign({ uid: doc.ref.id }, doc.data())
-        ),
+        data: sanitizedData,
       };
     })
     .catch((err) => {
@@ -98,14 +190,82 @@ exports.getAllDoctors = functions.https.onCall((data, context) => {
 exports.deleteDoctor = functions.https.onCall((data, context) => {
   let id = data.uid;
   return admin
-    .firestore()
-    .collection("doctors")
-    .doc(id)
-    .delete()
+    .database()
+    .ref("doctors/" + id)
+    .remove()
     .then((response) => {
       return { success: true, message: "deleted" };
     })
     .catch((response) => {
       return { success: false, message: "couldn't delete" };
+    });
+});
+
+exports.getAllSalesReps = functions.https.onCall((data, context) => {
+  return admin
+    .database()
+    .ref("sales-reps")
+    .once("value")
+    .then((snapshot) => {
+      // convert into a list
+      let val = snapshot.val();
+      let sanitizedData = [];
+      for (var key in val) {
+        sanitizedData.push(Object.assign({ uid: key }, val[key]));
+      }
+      return {
+        success: true,
+        message: "successful",
+        data: sanitizedData,
+      };
+    })
+    .catch((err) => {
+      return { success: false, message: err, data: null };
+    });
+});
+
+exports.deleteSalesRep = functions.https.onCall((data, context) => {
+  let id = data.uid;
+  return admin
+    .database()
+    .ref("sales-reps/" + id)
+    .remove()
+    .then((response) => {
+      return { success: true, message: "deleted" };
+    })
+    .catch((response) => {
+      return { success: false, message: "couldn't delete" };
+    });
+});
+
+exports.deleteReport = functions.https.onCall((data, context) => {
+  let id = data.uid;
+  return admin
+    .database()
+    .ref("reports/" + id)
+    .remove()
+    .then((response) => {
+      return { success: true, message: "deleted" };
+    })
+    .catch((response) => {
+      return { success: false, message: "couldn't delete" };
+    });
+});
+
+exports.getSalesRep = functions.https.onCall((data, context) => {
+  return admin
+    .database()
+    .ref("sales-reps/" + data.uid)
+    .once("value")
+    .then((snapshot) => {
+      // convert into a list
+      return {
+        success: true,
+        message: "successful",
+        data: snapshot.val(),
+      };
+    })
+    .catch((err) => {
+      return { success: false, message: err, data: null };
     });
 });

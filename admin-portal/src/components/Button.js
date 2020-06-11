@@ -9,16 +9,26 @@ export default function Button({
   containerStyle,
   textStyle,
   uppercase,
+  disabled,
 }) {
   return (
     <TouchableOpacity
       style={[styles.container, containerStyle]}
       onPress={callback}
+      disabled={disabled}
     >
-      <Text style={textStyle}>{uppercase ? title.toUpperCase() : title}</Text>
+      <Text
+        style={[textStyle, { color: disabled ? colors.grey : colors.blue }]}
+      >
+        {uppercase ? title.toUpperCase() : title}
+      </Text>
     </TouchableOpacity>
   );
 }
+
+Button.defaultProps = {
+  diabled: false,
+};
 
 const styles = StyleSheet.create({
   container: {},

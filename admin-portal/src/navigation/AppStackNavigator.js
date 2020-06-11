@@ -12,11 +12,9 @@ import LoginScreen from "../screens/LoginScreen";
 import HomeScreen from "../screens/HomeScreen";
 import NewItemScreen from "../screens/NewItemScreen";
 import EditFieldsScreen from "../screens/EditFieldsScreen";
+import UpdateItemScreen from "../screens/UpdateItemScreen"
 
 const Stack = createStackNavigator();
-const HorizontalTransition = {
-  gestureDirection: "horizontal",
-};
 
 /**
  * app stack navigator
@@ -66,6 +64,17 @@ function AppStackNavigator() {
           name={screenKeys.editFields}
           component={EditFieldsScreen}
         />
+        <Stack.Screen
+          options={{
+            animationEnabled: true,
+            gestureDirection: "vertical",
+            headerShown: true,
+            headerTitle: "Update Item",
+          }}
+          name={screenKeys.updateItem}
+          component={UpdateItemScreen}
+        />
+        
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -76,6 +85,7 @@ export const screenKeys = {
   home: "homescreen",
   newItem: "newitem",
   editFields: "editfields",
+  updateItem: "updateItem"
 };
 
 export default AppStackNavigator;
